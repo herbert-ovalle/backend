@@ -106,7 +106,7 @@ $app->post( '/ahorralink/guardarFormulario', function ( Request $request, Respon
     $contactoLlamada  = $datosFormulario[ 'contactoLlamada' ];
     $visitaAgencia    = $datosFormulario[ 'visitaAgencia' ];
     $visitarAsociado  = $datosFormulario[ 'visitarAsociado' ];
-    $fechaCita        = $datosFormulario[ 'fechaCita' ] ?? 'NULL';
+    $fechaCita        = empty( $datosFormulario[ 'fechaCita' ] ) ? 'NULL' : $datosFormulario[ 'fechaCita' ];
     $comentario       = $connect->quote( $datosFormulario[ 'comentario' ] );
     $idAgencia        = $datosFormulario[ 'idAgencia' ] ?? 'NULL';
 
@@ -114,7 +114,7 @@ $app->post( '/ahorralink/guardarFormulario', function ( Request $request, Respon
     $tipoCita     = $visitaAgencia ?? $visitarAsociado;
 
     try {
-        $sql = " CALL proGuardarFormularioAhorraLink( {$nombres}, {$apellidos}, {$telefono}, {$idDepartamento}, {$idMunicipio}, {$tipoContacto}, {$tipoCita}, '{$fechaCita}', {$idAgencia}, {$comentario} );";
+        $sql = " CALL proGuardarFormularioAhorraLink( {$nombres}, {$apellidos}, {$telefono}, {$idDepartamento}, {$idMunicipio}, {$tipoContacto}, {$tipoCita}, {$fechaCita}, {$idAgencia}, {$comentario} );";
 
         $stmt = $connect->prepare( $sql );
         $stmt->execute();
