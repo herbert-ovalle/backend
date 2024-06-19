@@ -106,7 +106,7 @@ $app->post( '/ahorralink/guardarFormulario', function ( Request $request, Respon
     $contactoLlamada  = $datosFormulario[ 'contactoLlamada' ];
     $visitaAgencia    = $datosFormulario[ 'visitaAgencia' ];
     $visitarAsociado  = $datosFormulario[ 'visitarAsociado' ];
-    $fechaCita        = empty( $datosFormulario[ 'fechaCita' ] ) ? 'NULL' : $datosFormulario[ 'fechaCita' ];
+    $fechaCita        = empty( $datosFormulario[ 'fechaCita' ] ) ? 'NULL' : "'" . $datosFormulario[ 'fechaCita' ] . "'";
     $comentario       = $connect->quote( $datosFormulario[ 'comentario' ] );
     $idAgencia        = $datosFormulario[ 'idAgencia' ] ?? 'NULL';
 
