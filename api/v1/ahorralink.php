@@ -6,8 +6,8 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 
 // Obtener departamentos
 $app->get( '/ahorralink/getDepartamentos', function ( Request $request, Response $response ) {
-    $connect = $this->get('db');
-    $sql = "SELECT id_departamento, departamento FROM crm_negocios_pruebas.departamento WHERE id_departamento IN(13, 15, 20, 21) ORDER BY id_departamento;";
+    $connect = $this->get( 'db' );
+    $sql     = "SELECT id_departamento, departamento FROM crm_negocios_pruebas.departamento WHERE id_departamento IN(13, 15, 20, 21) ORDER BY id_departamento;";
     try {
         $stmt          = $connect->query( $sql );
         $departamentos = $stmt->fetchAll( PDO::FETCH_OBJ );
@@ -32,40 +32,13 @@ $app->get( '/ahorralink/getDepartamentos', function ( Request $request, Response
 
 //Obtener el listado de agencias
 $app->get( '/ahorralink/getAgencias', function ( Request $request, Response $response ) {
-    $connect = $this->get('db');
+    $connect = $this->get( 'db' );
     try {
-        $sql = "SELECT id_agencia AS 'idAgencia', nombre AS 'agencia', direccion FROM usuarios.agencia WHERE id_agencia < 11 ORDER BY id_agencia;";
-        $stmt          = $connect->query( $sql );
+        $sql             = "SELECT id_agencia AS 'idAgencia', nombre AS 'agencia', direccion FROM usuarios.agencia WHERE id_agencia < 11 ORDER BY id_agencia;";
+        $stmt            = $connect->query( $sql );
         $listadoAgencias = $stmt->fetchAll( PDO::FETCH_OBJ );
 
         $response->getBody()->write( json_encode( $listadoAgencias ) );
-
-        return $response
-            ->withHeader( 'content-type', 'application/json' )
-            ->withStatus( 200 );
-    } catch ( PDOException $e ) {
-        $error = [
-            'respuesta' => 'danger',
-            'mensaje'   => $e->getMessage()
-        ];
-
-        $response->getBody()->write( json_encode( $error ) );
-        return $response
-            ->withHeader( 'content-type', 'application/json' )
-            ->withStatus( 500 );
-    }
-});
-
-
-//Obtener los estados de la solicitud
-$app->get( '/ahorralink/getListadoEstadosSolicitud', function ( Request $request, Response $response ) {
-    $connect = $this->get('db');
-    $sql = "SELECT idEstadoSolicitud, estadoSolicitud FROM gestorCreditos.estadoSolicitud ORDER BY idEstadoSolicitud;";
-    try {
-        $stmt          = $connect->query( $sql );
-        $estadoSolicitud = $stmt->fetchAll( PDO::FETCH_OBJ );
-
-        $response->getBody()->write( json_encode( $estadoSolicitud ) );
 
         return $response
             ->withHeader( 'content-type', 'application/json' )
@@ -85,8 +58,8 @@ $app->get( '/ahorralink/getListadoEstadosSolicitud', function ( Request $request
 
 /*-- Consultar todos los municipios del departamento seleccionado*/
 $app->post( '/ahorralink/getMunicipios', function ( Request $request, Response $response ) {
-    $connect = $this->get('db');
-    $data = $request->getParsedBody();
+    $connect = $this->get( 'db' );
+    $data    = $request->getParsedBody();
 
     $idDepartamento = $data[ 'idDepartamento' ];
 
@@ -116,29 +89,45 @@ $app->post( '/ahorralink/getMunicipios', function ( Request $request, Response $
 
 /*-- Guardar nueva solicitud*/
 $app->post( '/ahorralink/guardarFormulario', function ( Request $request, Response $response, array $args ) {
-    $connect = $this->get('db');
+    $connect         = $this->get( 'db' );
     $data            = $request->getParsedBody();
-    $datosFormulario = $data[ 'formulario' ];
+    $datosFormulario = $data[ 'asociado' ];
 
-    $observaciones = $connect->quote( $data[ 'observaciones' ] );
+    $respuesta  = '';
+    $mensaje    = '';
+    $idRegistro = '';
 
-    $jsonData = json_encode( $datosFormulario );
+    $nombres          = $connect->quote( $datosFormulario[ 'nombres' ] );
+    $apellidos        = $connect->quote( $datosFormulario[ 'apellidos' ] );
+    $telefono         = $datosFormulario[ 'telefono' ];
+    $idDepartamento   = $datosFormulario[ 'idDepartamento' ];
+    $idMunicipio      = $datosFormulario[ 'idMunicipio' ];
+    $contactoWhatsApp = $datosFormulario[ 'contactoWhatsApp' ];
+    $contactoLlamada  = $datosFormulario[ 'contactoLlamada' ];
+    $visitaAgencia    = $datosFormulario[ 'visitaAgencia' ];
+    $visitarAsociado  = $datosFormulario[ 'visitarAsociado' ];
+    $fechaCita        = $datosFormulario[ 'fechaCita' ] ?? 'NULL';
+    $comentario       = $connect->quote( $datosFormulario[ 'comentario' ] );
+    $idAgencia        = $datosFormulario[ 'idAgencia' ] ?? 'NULL';
+
+    $tipoContacto = $contactoWhatsApp ?? $contactoLlamada;
+    $tipoCita     = $visitaAgencia ?? $visitarAsociado;
 
     try {
-        $sql = "CALL gestorCreditos.proGuardarSolicitud('insert', NULL, '{$jsonData}', $observaciones);";
+        $sql = " CALL proGuardarFormularioAhorraLink( {$nombres}, {$apellidos}, {$telefono}, {$idDepartamento}, {$idMunicipio}, {$tipoContacto}, {$tipoCita}, '{$fechaCita}', {$idAgencia}, {$comentario} );";
 
         $stmt = $connect->prepare( $sql );
         $stmt->execute();
 
         $stmt->bindColumn( 'respuesta', $respuesta );
         $stmt->bindColumn( 'mensaje', $mensaje );
-        $stmt->bindColumn( 'idSolicitud', $idSolicitud );
+        $stmt->bindColumn( 'idRegistro', $idRegistro );
         $stmt->fetch();
 
         $responseBody = [
-            'respuesta'   => $respuesta,
-            'mensaje'     => $mensaje,
-            'idSolicitud' => $idSolicitud
+            'respuesta'  => $respuesta,
+            'mensaje'    => $mensaje,
+            'idRegistro' => $idRegistro
         ];
 
         $response->getBody()->write( json_encode( $responseBody ) );
@@ -147,9 +136,9 @@ $app->post( '/ahorralink/guardarFormulario', function ( Request $request, Respon
             ->withStatus( 200 );
     } catch ( PDOException $e ) {
         $error = [
-            'respuesta'   => 'danger',
-            'mensaje'     => $e->getMessage(),
-            'idSolicitud' => NULL
+            'respuesta'  => 'danger',
+            'mensaje'    => $e->getMessage(),
+            'idRegistro' => NULL
         ];
 
         $response->getBody()->write( json_encode( $error ) );
