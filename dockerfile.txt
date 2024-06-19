@@ -1,0 +1,31 @@
+# Usa una imagen de PHP con Apache
+FROM php:apache
+
+# Instala Node.js y npm
+RUN curl -sL https://deb.nodesource.com/setup_14.x | bash -
+RUN apt-get install -y nodejs
+
+# Instala Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Habilitar el módulo de reescritura de Apache
+RUN a2enmod rewrite
+
+# Instala la extensión PDO para la conexión a la base de datos
+RUN docker-php-ext-install pdo_mysql
+
+# Copia tu configuración de Apache personalizada
+#COPY apache-config.conf /etc/apache2/sites-available/000-default.conf
+
+# Copia tu aplicación PHP al directorio del servidor web
+COPY . /var/www/html
+
+# Establecer permisos adecuados en el directorio /var/www/html
+RUN chown -R www-data:www-data /var/www/html
+RUN chmod -R 777 /var/www/html
+
+# Exponer el puerto 80
+EXPOSE 80
+
+# Comando por defecto al iniciar el contenedor
+CMD ["apache2-foreground"]
