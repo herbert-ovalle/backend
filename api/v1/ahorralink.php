@@ -34,7 +34,10 @@ $app->get( '/ahorralink/getDepartamentos', function ( Request $request, Response
 $app->get( '/ahorralink/getAgencias', function ( Request $request, Response $response ) {
     $connect = $this->get( 'db' );
     try {
-        $sql             = "SELECT id_agencia AS 'idAgencia', nombre AS 'agencia', direccion FROM usuarios.agencia WHERE id_agencia < 11 ORDER BY id_agencia;";
+        $sql             = "SELECT id_agencia AS 'idAgencia', nombre AS 'agencia', direccion
+                            FROM usuarios.agencia
+                            WHERE id_agencia IN(1,2,3,4,5,6,7,8,9,10,11)
+                            ORDER BY id_agencia;";
         $stmt            = $connect->query( $sql );
         $listadoAgencias = $stmt->fetchAll( PDO::FETCH_OBJ );
 
