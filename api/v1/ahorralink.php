@@ -7,7 +7,7 @@ use Psr\Http\Message\ServerRequestInterface as Request;
 // Obtener departamentos
 $app->get( '/ahorralink/getDepartamentos', function ( Request $request, Response $response ) {
     $connect = $this->get( 'db' );
-    $sql     = "SELECT id_departamento, departamento FROM crm_negocios_pruebas.departamento WHERE id_departamento IN(13, 15, 20, 21) ORDER BY id_departamento;";
+    $sql     = "SELECT id_departamento, departamento FROM crm_negocios_pruebas.departamento WHERE id_departamento IN(13, 15, 20) ORDER BY id_departamento;";
     try {
         $stmt          = $connect->query( $sql );
         $departamentos = $stmt->fetchAll( PDO::FETCH_OBJ );
