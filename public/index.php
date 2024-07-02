@@ -18,7 +18,7 @@ $container = new Container();
 //funciones
 require __DIR__ . '/../functions/funciones.php';
 
-header( "Access-Control-Allow-Origin: http://localhost:4200" );
+header( "Access-Control-Allow-Origin: https://inversiones.micoopebienestar.com.gt" );
 header( "Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS" );
 header( "Access-Control-Allow-Headers: Content-Type" );
 
@@ -32,7 +32,7 @@ $app = AppFactory::create();
 $jwtMiddleware = new JwtMiddleware();
 
 //modificar la ruta del backend para el servidor
-$app->setBasePath( "/ahorralink/backend/public" );
+$app->setBasePath( "/backend/public" );
 
 $app->options( '/{routes:.+}', function ( $request, $response, $args ) {
     return $response;
@@ -41,7 +41,7 @@ $app->options( '/{routes:.+}', function ( $request, $response, $args ) {
 $app->add( function ( $request, $handler ) {
     $response = $handler->handle( $request );
     return $response
-        ->withHeader( 'Access-Control-Allow-Origin', '*' )
+        ->withHeader( 'Access-Control-Allow-Origin', 'https://inversiones.micoopebienestar.com.gt' )
         ->withHeader( 'Access-Control-Allow-Headers', 'Content-Type, X-Requested-With, Accept, Origin, Authorization' )
         ->withHeader( 'Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS' );
 } );

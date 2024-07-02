@@ -26,6 +26,7 @@ return function ( Container $container ) {
             try {
                 $pdo = new PDO( $dsn, $user, $pass );
                 $pdo->setAttribute( PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION );
+                $pdo->exec("SET NAMES 'utf8mb4'");
                 return $pdo;
             } catch ( PDOException $e ) {
                 $intento++;
