@@ -30,6 +30,32 @@ $app->get( '/ahorralink/getDepartamentos', function ( Request $request, Response
     }
 } );
 
+// Obtener los productos
+$app->get( '/ahorralink/getProductos', function ( Request $request, Response $response ) {
+    $connect = $this->get( 'db' );
+    $sql     = "SELECT id_producto AS 'idProducto', producto FROM crm_negocios_pruebas.producto WHERE id_producto IN(5, 6, 7, 9, 11);";
+    try {
+        $stmt          = $connect->query( $sql );
+        $productos = $stmt->fetchAll( PDO::FETCH_OBJ );
+
+        $response->getBody()->write( json_encode( $productos ) );
+
+        return $response
+            ->withHeader( 'content-type', 'application/json' )
+            ->withStatus( 200 );
+    } catch ( PDOException $e ) {
+        $error = [
+            'respuesta' => 'danger',
+            'mensaje'   => $e->getMessage()
+        ];
+
+        $response->getBody()->write( json_encode( $error ) );
+        return $response
+            ->withHeader( 'content-type', 'application/json' )
+            ->withStatus( 500 );
+    }
+} );
+
 //Obtener el listado de agencias
 $app->get( '/ahorralink/getAgencias', function ( Request $request, Response $response ) {
     $connect = $this->get( 'db' );
@@ -112,12 +138,13 @@ $app->post( '/ahorralink/guardarFormulario', function ( Request $request, Respon
     $fechaCita        = empty( $datosFormulario[ 'fechaCita' ] ) ? 'NULL' : "'" . $datosFormulario[ 'fechaCita' ] . "'";
     $comentario       = $connect->quote( $datosFormulario[ 'comentario' ] );
     $idAgencia        = $datosFormulario[ 'idAgencia' ] ?? 'NULL';
+    $idProducto       = $datosFormulario[ 'idProducto' ] ?? 'NULL';
 
     $tipoContacto = $contactoWhatsApp ?? $contactoLlamada;
     $tipoCita     = $visitaAgencia ?? $visitarAsociado;
 
     try {
-        $sql = " CALL proGuardarFormularioAhorraLink( {$nombres}, {$apellidos}, {$telefono}, {$idDepartamento}, {$idMunicipio}, {$tipoContacto}, {$tipoCita}, {$fechaCita}, {$idAgencia}, {$comentario} );";
+        $sql = " CALL proGuardarFormularioAhorraLink( {$nombres}, {$apellidos}, {$telefono}, {$idDepartamento}, {$idMunicipio}, {$tipoContacto}, {$tipoCita}, {$fechaCita}, {$idAgencia}, {$idProducto}, {$comentario} );";
 
         $stmt = $connect->prepare( $sql );
         $stmt->execute();
